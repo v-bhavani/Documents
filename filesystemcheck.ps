@@ -1,0 +1,28 @@
+# Function to check disk space usage
+function Check-DiskSpace {
+    Write-Host "Checking disk space usage..."
+    Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{Name="UsedSpaceGB";Expression={[math]::round($_.Used/1GB, 2)}}, @{Name="FreeSpaceGB";Expression={[math]::round($_.Free/1GB, 2)}}, @{Name="TotalSpaceGB";Expression={[math]::round(($_.Used + $_.Free)/1GB, 2)}}
+    Write-Host ""
+}
+ 
+# Function to check filesystem errors (CHKDSK equivalent in Windows)
+function Check-FilesystemErrors {
+    Write-Host "Checking filesystem for errors..."
+    $volumes = Get-Volume -FileSystemType NTFS | Select-Object -ExpandProperty DriveLetter
+    foreach ($volume in $volumes) {
+        Write-Host "Checking volume $volume..."
+        chkdsk "$volume`:" /scan
+        Write-Host ""
+    }
+}
+ 
+# Main function
+function Main {
+    Write-Host "Starting filesystem check..."
+    Check-DiskSpace
+    Check-FilesystemErrors
+    Write-Host "Filesystem check completed."
+}
+ 
+# Run the main function
+Main
